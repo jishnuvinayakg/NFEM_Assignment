@@ -26,3 +26,10 @@ def compute_sigma(strain_next,strain_int,sigma_ov_int,E,v,dt,T,Q):
     sigma_next = np.dot(C,strain_next) + sigma_ov
 
     return sigma_next,sigma_ov
+
+
+def compute_C(E,v):
+    val_1 = E/((1+v)*(1-2*v))
+    temp_C = np.array([[1-v,v],[v,1-v]])
+    C = val_1*temp_C
+    return C

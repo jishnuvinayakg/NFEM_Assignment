@@ -1,5 +1,5 @@
 import numpy as np
-from Material_routine import compute_Ct,compute_sigma
+from Material_routine import compute_Ct,compute_sigma,compute_C
 def shape_fn(Zta):
     N1 = 1/2*(1-Zta)
     N2 = 1/2*(1+Zta)
@@ -45,3 +45,11 @@ def gauss_quadrature_Ke_t(w,Le,E,v,Q,dt,T,Zta,re1,re2):
     C_t = compute_Ct(E,v,Q,dt,T)
     Ke_t = w*(((B.T)@C_t)@B)*(r_zta * (Le/2))
     return Ke_t
+
+def elemental_stress(strain_e,sigma_ov_e,E,v):
+
+    C = compute_C(E,v)
+    stress_e = C@strain_e + sigma_ov_e
+
+    return stress_e
+

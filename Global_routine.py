@@ -70,10 +70,11 @@ def Newton_Raphson_method(K_max,tolerence,num_elements,element_lengths,E,v,Q,T,d
     Kt = assemble_Kt(num_elements,element_lengths,E,v,Q,T,dt,r_nodes)
     F_ext = assemble_Fext(num_elements,element_lengths,p,a)
     #np.set_printoptions(suppress=True)
-    k =1
+    k =0
     Kt_inv = np.array([[],[]],dtype=float)
     def Euclidean_norm(y):
-        result = np.sqrt(y.T@y)
+        #result = np.sqrt(y.T@y)
+        result = np.linalg.norm(y,ord=np.inf)
         return result.item()
 
     while True:
@@ -86,15 +87,20 @@ def Newton_Raphson_method(K_max,tolerence,num_elements,element_lengths,E,v,Q,T,d
         R = -(F_int - F_ext)
         del_u = Kt_inv@R
         U_next = U_int + del_u
+        #print(f'F_int iteration @ {k} @ time step {t} : {F_int}')
+        F_int,sigma_ov = assemble_Fint(U_next,strain_int,sigma_ov_int,E,v,dt,Q,T,r_nodes,element_lengths)
+        R = -(F_int-F_ext)
+
         norm_R = Euclidean_norm(R)
         norm_delta_U = Euclidean_norm(del_u)
         norm_Fint = Euclidean_norm(F_int)
         norm_U = Euclidean_norm(U_next)
+
         if k == K_max:
             print(f'Not converging {k}')
-        if ((k>=K_max) or (norm_R >tolerence*norm_Fint or norm_delta_U >tolerence*norm_delta_U)):
-        #if(not(norm_R > tolerence or norm_delta_U > tolerence) and (not k < K_max)):
-            print(f'Numer of NR runs : {k} @ time step {t}')
+        #if ((k>=K_max) or (norm_R >tolerence*norm_Fint or norm_delta_U >tolerence*norm_delta_U)):
+        if ((k>=K_max) or (norm_R <=tolerence*norm_Fint or norm_delta_U <=tolerence*norm_U)):
+            print(f'Numer of NR runs : {k+1} @ time step {t}')
             return U_next,sigma_ov
         U_int = U_next
         k+=1
@@ -102,9 +108,6 @@ def Newton_Raphson_method(K_max,tolerence,num_elements,element_lengths,E,v,Q,T,d
 def assemble_strain(U,number_elements,element_lengths,r_nodes):
     Zta = 0
     Strain = np.array([[],[]])
-
-    def r_zta(Zta,Le,rn):
-        return (Le/2)*(1+Zta) + rn
 
     for i,Le in zip(range(1, number_elements+1),element_lengths):
         re1 = r_nodes[i-1]
@@ -115,6 +118,18 @@ def assemble_strain(U,number_elements,element_lengths,r_nodes):
         Strain = np.append(Strain,strain,axis =1)
     return  Strain
 
+def assemble_stress(strain,sigma_ov,E,v,number_elements):
+
+    Stress = np.array([[],[]])
+
+    for i in range(1,number_elements+1):
+        strain_e = np.array([[strain[0][i-1]],[strain[1][i-1]]])
+        sigma_ov_e = np.array([[sigma_ov[0][i-1]],[sigma_ov[1][i-1]]])
+        stress = Element_routine.elemental_stress(strain_e,sigma_ov_e,E,v)
+        Stress = np.append(Stress,stress,axis=1)
+
+    return Stress
+
 def non_linear_fem_solver(num_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_nodes,t_l,t_f):
 
     time = np.arange(0,t_f,dt)
@@ -122,6 +137,7 @@ def non_linear_fem_solver(num_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_node
     U_int = np.zeros((len(r_nodes),1))
     strain = np.zeros((2,num_elements))
     stress_ov = np.zeros((2,num_elements))
+    U_tL = np.array([[],[]])
     p =0
 
     for t in time[1:]:
@@ -135,4 +151,11 @@ def non_linear_fem_solver(num_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_node
         stress_ov = sigma_ov_updated
         strain = assemble_strain(U_next,num_elements,element_lengths,r_nodes)
         U_int = U_next
-    return U,strain
+        U_tL = U_next
+    
+    #compute stress and strain for last time step
+
+    strain_L = assemble_strain(U_tL,num_elements,element_lengths,r_nodes)
+    stress_L = assemble_stress(strain_L,stress_ov,E,v,num_elements)
+
+    return U,stress_L

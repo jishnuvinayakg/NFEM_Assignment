@@ -61,29 +61,150 @@ def elastic_convergence_study():
     def call_FEM_solver(number_elements):
 
         r_nodes,element_lengths = meshing(r_inner,r_outer,meshrefinementfactor,number_elements)
-        U,strain = Global_routine.non_linear_fem_solver(number_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_nodes,t_l,t_f)
+        U,_ = Global_routine.non_linear_fem_solver(number_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_nodes,t_l,t_f)
+        #print(U)
         return U[0],r_nodes
     
     
-    u_numerical_10_elements,r_10 = call_FEM_solver(10)
-    u_numerical_15_elements,r_15 = call_FEM_solver(15)
-    u_numerical_20_elements,r_20 = call_FEM_solver(20)
-    u_numerical_25_elements,r_25 = call_FEM_solver(25)
-    u_numerical_90_elements,r_90 = call_FEM_solver(30)
-    u_analytical = analytical_solution(P[0],E,v,r_inner,r_outer,np.array(r_90))
-    print(f'Analytical u : {u_analytical}')
-    print(f'numerical u : {u_numerical_10_elements}')
+    u_numerical_3_elements,r_10 = call_FEM_solver(3)
+    u_numerical_5_elements,r_15 = call_FEM_solver(5)
+    u_numerical_10_elements,r_20 = call_FEM_solver(10)
+    u_numerical_15_elements,r_25 = call_FEM_solver(15)
+    u_analytical = analytical_solution(P[0],E,v,r_inner,r_outer,np.array(r_25))
  
     fig,ax = plt.subplots()
-    ax.plot(r_90,u_analytical,color ='black',label='Analytical')
-    ax.plot(r_10,u_numerical_10_elements,'+',label='Numerical 10 elements')
-    ax.plot(r_15,u_numerical_15_elements,'*',label='Numerical 15 elements')
-    ax.plot(r_20,u_numerical_20_elements,'--',label='Numerical 20 elements')
-    ax.plot(r_25,u_numerical_25_elements,'--',label='Numerical 25 elements')
-    ax.plot(r_90,u_numerical_90_elements,'+',label='Numerical 90 elements')
+    ax.plot(r_25,u_analytical,color ='black',label='Analytical')
+    ax.plot(r_10,u_numerical_3_elements,'+--',label='Numerical 3 elements')
+    ax.plot(r_15,u_numerical_5_elements,'*--',label='Numerical 5 elements')
+    ax.plot(r_20,u_numerical_10_elements,'o--',label='Numerical 10 elements')
+    ax.plot(r_25,u_numerical_15_elements,'--',label='Numerical 15 elements')
     ax.set(xlabel='r',ylabel='Displacement')
     plt.title('Displacment along radial direction for elastic case (Q=0)')
     plt.legend()
     plt.show()
 
-elastic_convergence_study()
+def visco_elastic_convergence_study():
+    r_inner = 40
+    r_outer = 80
+    meshrefinementfactor = 2
+    E = 70e3
+    v =0.25
+    Q = 35e3
+    T =1 
+    P_max =50
+    a= 40
+    t_l =2
+    t_f = 10
+
+    r,_ = meshing(r_inner,r_outer,meshrefinementfactor,25)
+    u_analytical = analytical_solution(50,E,v,r_inner,r_outer,r)
+
+    def call_FEM_solver(number_elements,dt):
+
+        r_nodes,element_lengths = meshing(r_inner,r_outer,meshrefinementfactor,number_elements)
+        U,_ = Global_routine.non_linear_fem_solver(number_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_nodes,t_l,t_f)
+
+        return U[-1],r_nodes
+
+    
+    #Keeping number of elements constant and changing dt
+
+    #10 elements
+    u_numerical_10_elements_1dt,r_10_1dt = call_FEM_solver(3,1.5)
+    u_numerical_10_elements_2dt,r_10_2dt = call_FEM_solver(3,1.3)
+    u_numerical_10_elements_3dt,r_10_3dt = call_FEM_solver(3,1.2)
+    u_numerical_10_elements_4dt,r_10_4dt = call_FEM_solver(3,0.1)
+
+    #30 elements
+    u_numerical_30_elements_1dt,r_30_1dt = call_FEM_solver(5,2)
+    u_numerical_30_elements_2dt,r_30_2dt = call_FEM_solver(5,1.9)
+    u_numerical_30_elements_3dt,r_30_3dt = call_FEM_solver(5,1.7)
+    u_numerical_30_elements_4dt,r_30_4dt = call_FEM_solver(5,1)
+
+    #60 elements
+    u_numerical_60_elements_1dt,r_60_1dt = call_FEM_solver(10,2)
+    u_numerical_60_elements_2dt,r_60_2dt = call_FEM_solver(10,1.9)
+    u_numerical_60_elements_3dt,r_60_3dt = call_FEM_solver(10,1.7)
+    u_numerical_60_elements_4dt,r_60_4dt = call_FEM_solver(10,1)
+
+    #90 elements
+    u_numerical_90_elements_1dt,r_90_1dt= call_FEM_solver(15,2)
+    u_numerical_90_elements_2dt,r_90_2dt = call_FEM_solver(15,1.9)
+    u_numerical_90_elements_3dt,r_90_3dt = call_FEM_solver(15,1.7)
+    u_numerical_90_elements_4dt,r_90_4dt = call_FEM_solver(15,1)
+
+    fig,ax = plt.subplots(2,2)
+    #plt.title('Conergence study of visco elastic case')
+    ax[0,0].plot(r,u_analytical,color ='black',label='Analytical')
+    ax[0,0].plot(r_10_1dt,u_numerical_10_elements_1dt,'--',label='Δt-1.5')
+    ax[0,0].plot(r_10_2dt,u_numerical_10_elements_2dt,'--',label='Δt-1.3')
+    ax[0,0].plot(r_10_3dt,u_numerical_10_elements_3dt,'--',label='Δt-1.2')
+    ax[0,0].plot(r_10_4dt,u_numerical_10_elements_4dt,'--',label='Δt-1')
+    ax[0,0].set_title('3 Elements')
+    ax[0,0].legend()
+
+    ax[0,1].plot(r,u_analytical,color ='black',label='Analytical')
+    ax[0,1].plot(r_30_1dt,u_numerical_30_elements_1dt,'--',label='Delta_t - 2')
+    ax[0,1].plot(r_30_2dt,u_numerical_30_elements_2dt,'--',label='Delta_t - 1.9')
+    ax[0,1].plot(r_30_3dt,u_numerical_30_elements_3dt,'--',label='Delta_t - 1.7')
+    ax[0,1].plot(r_30_4dt,u_numerical_30_elements_4dt,'--',label='Delta_t - 1')
+    ax[0,1].set_title('5 Elements')
+    ax[0,1].legend()
+
+    ax[1,0].plot(r,u_analytical,color ='black',label='Analytical')
+    ax[1,0].plot(r_60_1dt,u_numerical_60_elements_1dt,'--',label='Delta_t - 2')
+    ax[1,0].plot(r_60_2dt,u_numerical_60_elements_2dt,'--',label='Delta_t - 1.9')
+    ax[1,0].plot(r_60_3dt,u_numerical_60_elements_3dt,'--',label='Delta_t - 1.7')
+    ax[1,0].plot(r_60_4dt,u_numerical_60_elements_4dt,'--',label='Delta_t - 1')
+    ax[1,0].set_title('10 Elements')
+    ax[1,0].legend()
+
+    ax[1,1].plot(r,u_analytical,color ='black',label='Analytical')
+    ax[1,1].plot(r_90_1dt,u_numerical_90_elements_1dt,'--',label='Delta_t - 2')
+    ax[1,1].plot(r_90_2dt,u_numerical_90_elements_2dt,'--',label='Delta_t - 1.9')
+    ax[1,1].plot(r_90_3dt,u_numerical_90_elements_3dt,'--',label='Delta_t - 1.7')
+    ax[1,1].plot(r_90_4dt,u_numerical_90_elements_4dt,'--',label='Delta_t - 1')
+    ax[1,1].set_title('15 Elements')
+    ax[1,1].legend()
+    
+    #plt.legend()
+    plt.show()
+
+def extract_required_results():
+    r_inner = 40
+    r_outer = 80
+    meshrefinementfactor = 2
+    number_elements = 10
+    E = 70e3
+    v =0.25
+    Q =35e3
+    T =1 
+    P_max =50
+    a= 40
+    dt = 1
+    t_l =2
+    t_f = 10
+    time = np.arange(0,t_f,dt)
+
+    r_nodes,element_lengths = meshing(r_inner,r_outer,meshrefinementfactor,number_elements)
+    U,Stress = Global_routine.non_linear_fem_solver(number_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_nodes,t_l,t_f)
+
+    u_r_t =[]
+    for u in U:
+        u_r_t.append(u[-1])
+
+    fig,ax = plt.subplots()
+    ax.plot(time[1:],u_r_t)
+    plt.show()
+
+    print(Stress)
+
+
+
+
+#elastic_convergence_study()
+#visco_elastic_convergence_study()
+extract_required_results()
+
+
+
