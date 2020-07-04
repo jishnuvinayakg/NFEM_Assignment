@@ -55,8 +55,6 @@ def elastic_convergence_study():
             P.append(p)
         else:
             P.append(P_max)
-    
-    print(P)
 
     def call_FEM_solver(number_elements):
 
@@ -80,6 +78,7 @@ def elastic_convergence_study():
     ax.plot(r_25,u_numerical_15_elements,'--',label='Numerical 15 elements')
     ax.set(xlabel='r',ylabel='Displacement')
     plt.title('Displacment along radial direction for elastic case (Q=0)')
+    fig.savefig('Elastic convergence study')
     plt.legend()
     plt.show()
 
@@ -106,7 +105,6 @@ def visco_elastic_convergence_study():
 
         return U[-1],r_nodes
 
-    
     #Keeping number of elements constant and changing dt
 
     #10 elements
@@ -116,22 +114,22 @@ def visco_elastic_convergence_study():
     u_numerical_10_elements_4dt,r_10_4dt = call_FEM_solver(3,0.1)
 
     #30 elements
-    u_numerical_30_elements_1dt,r_30_1dt = call_FEM_solver(5,2)
-    u_numerical_30_elements_2dt,r_30_2dt = call_FEM_solver(5,1.9)
-    u_numerical_30_elements_3dt,r_30_3dt = call_FEM_solver(5,1.7)
-    u_numerical_30_elements_4dt,r_30_4dt = call_FEM_solver(5,1)
+    u_numerical_30_elements_1dt,r_30_1dt = call_FEM_solver(5,1.5)
+    u_numerical_30_elements_2dt,r_30_2dt = call_FEM_solver(5,1.3)
+    u_numerical_30_elements_3dt,r_30_3dt = call_FEM_solver(5,1.2)
+    u_numerical_30_elements_4dt,r_30_4dt = call_FEM_solver(5,0.1)
 
     #60 elements
-    u_numerical_60_elements_1dt,r_60_1dt = call_FEM_solver(10,2)
-    u_numerical_60_elements_2dt,r_60_2dt = call_FEM_solver(10,1.9)
-    u_numerical_60_elements_3dt,r_60_3dt = call_FEM_solver(10,1.7)
-    u_numerical_60_elements_4dt,r_60_4dt = call_FEM_solver(10,1)
+    u_numerical_60_elements_1dt,r_60_1dt = call_FEM_solver(10,1.5)
+    u_numerical_60_elements_2dt,r_60_2dt = call_FEM_solver(10,1.3)
+    u_numerical_60_elements_3dt,r_60_3dt = call_FEM_solver(10,1.2)
+    u_numerical_60_elements_4dt,r_60_4dt = call_FEM_solver(10,0.1)
 
     #90 elements
-    u_numerical_90_elements_1dt,r_90_1dt= call_FEM_solver(15,2)
-    u_numerical_90_elements_2dt,r_90_2dt = call_FEM_solver(15,1.9)
-    u_numerical_90_elements_3dt,r_90_3dt = call_FEM_solver(15,1.7)
-    u_numerical_90_elements_4dt,r_90_4dt = call_FEM_solver(15,1)
+    u_numerical_90_elements_1dt,r_90_1dt= call_FEM_solver(15,1.5)
+    u_numerical_90_elements_2dt,r_90_2dt = call_FEM_solver(15,1.3)
+    u_numerical_90_elements_3dt,r_90_3dt = call_FEM_solver(15,1.2)
+    u_numerical_90_elements_4dt,r_90_4dt = call_FEM_solver(15,0.1)
 
     fig,ax = plt.subplots(2,2)
     #plt.title('Conergence study of visco elastic case')
@@ -139,35 +137,35 @@ def visco_elastic_convergence_study():
     ax[0,0].plot(r_10_1dt,u_numerical_10_elements_1dt,'--',label='Δt-1.5')
     ax[0,0].plot(r_10_2dt,u_numerical_10_elements_2dt,'--',label='Δt-1.3')
     ax[0,0].plot(r_10_3dt,u_numerical_10_elements_3dt,'--',label='Δt-1.2')
-    ax[0,0].plot(r_10_4dt,u_numerical_10_elements_4dt,'--',label='Δt-1')
+    ax[0,0].plot(r_10_4dt,u_numerical_10_elements_4dt,'--',label='Δt-0.1')
     ax[0,0].set_title('3 Elements')
     ax[0,0].legend()
 
     ax[0,1].plot(r,u_analytical,color ='black',label='Analytical')
-    ax[0,1].plot(r_30_1dt,u_numerical_30_elements_1dt,'--',label='Delta_t - 2')
-    ax[0,1].plot(r_30_2dt,u_numerical_30_elements_2dt,'--',label='Delta_t - 1.9')
-    ax[0,1].plot(r_30_3dt,u_numerical_30_elements_3dt,'--',label='Delta_t - 1.7')
-    ax[0,1].plot(r_30_4dt,u_numerical_30_elements_4dt,'--',label='Delta_t - 1')
+    ax[0,1].plot(r_30_1dt,u_numerical_30_elements_1dt,'--',label='Δt-1.5')
+    ax[0,1].plot(r_30_2dt,u_numerical_30_elements_2dt,'--',label='Δt-1.3')
+    ax[0,1].plot(r_30_3dt,u_numerical_30_elements_3dt,'--',label='Δt-1.2')
+    ax[0,1].plot(r_30_4dt,u_numerical_30_elements_4dt,'--',label='Δt-0.1')
     ax[0,1].set_title('5 Elements')
     ax[0,1].legend()
 
     ax[1,0].plot(r,u_analytical,color ='black',label='Analytical')
-    ax[1,0].plot(r_60_1dt,u_numerical_60_elements_1dt,'--',label='Delta_t - 2')
-    ax[1,0].plot(r_60_2dt,u_numerical_60_elements_2dt,'--',label='Delta_t - 1.9')
-    ax[1,0].plot(r_60_3dt,u_numerical_60_elements_3dt,'--',label='Delta_t - 1.7')
-    ax[1,0].plot(r_60_4dt,u_numerical_60_elements_4dt,'--',label='Delta_t - 1')
+    ax[1,0].plot(r_60_1dt,u_numerical_60_elements_1dt,'--',label='Δt-1.5')
+    ax[1,0].plot(r_60_2dt,u_numerical_60_elements_2dt,'--',label='Δt-1.3')
+    ax[1,0].plot(r_60_3dt,u_numerical_60_elements_3dt,'--',label='Δt-1.2')
+    ax[1,0].plot(r_60_4dt,u_numerical_60_elements_4dt,'--',label='Δt-0.1')
     ax[1,0].set_title('10 Elements')
     ax[1,0].legend()
 
     ax[1,1].plot(r,u_analytical,color ='black',label='Analytical')
-    ax[1,1].plot(r_90_1dt,u_numerical_90_elements_1dt,'--',label='Delta_t - 2')
-    ax[1,1].plot(r_90_2dt,u_numerical_90_elements_2dt,'--',label='Delta_t - 1.9')
-    ax[1,1].plot(r_90_3dt,u_numerical_90_elements_3dt,'--',label='Delta_t - 1.7')
-    ax[1,1].plot(r_90_4dt,u_numerical_90_elements_4dt,'--',label='Delta_t - 1')
+    ax[1,1].plot(r_90_1dt,u_numerical_90_elements_1dt,'--',label='Δt-1.5')
+    ax[1,1].plot(r_90_2dt,u_numerical_90_elements_2dt,'--',label='Δt-1.3')
+    ax[1,1].plot(r_90_3dt,u_numerical_90_elements_3dt,'--',label='Δt-1.2')
+    ax[1,1].plot(r_90_4dt,u_numerical_90_elements_4dt,'--',label='Δt-0.1')
     ax[1,1].set_title('15 Elements')
     ax[1,1].legend()
-    
-    #plt.legend()
+    fig.set_size_inches(12,10)
+    fig.savefig('Viscoelastic convergence study')
     plt.show()
 
 def extract_required_results():
@@ -184,7 +182,7 @@ def extract_required_results():
     dt = 1
     t_l =2
     t_f = 10
-    time = np.arange(0,t_f,dt)
+    time = np.arange(0,t_f+1,dt)
 
     r_nodes,element_lengths = meshing(r_inner,r_outer,meshrefinementfactor,number_elements)
     U,Stress = Global_routine.non_linear_fem_solver(number_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_nodes,t_l,t_f)
@@ -194,10 +192,16 @@ def extract_required_results():
         u_r_t.append(u[-1])
 
     fig,ax = plt.subplots()
-    ax.plot(time[1:],u_r_t)
+    ax.plot(time[1:],u_r_t,'g')
+    ax.set(xlabel = 'time (s)',ylabel ='Displacement(r mm)')
+    plt.title("History of widening of pipe Ur(r=b,t)")
+    fig.savefig('History of widening')
     plt.show()
 
     print(Stress)
+    with open('result.txt','w') as f:
+        f.write('The displacement at final time step is \n ' + str(U[-1]) +'\n\n\n')
+        f.write('The stress at final time step is \n\n Stress σ rr \n' + str(Stress[0]) +'\n\n\n' +'Stress σ φφ \n'+str(Stress[1]))
 
 
 
