@@ -1,0 +1,12 @@
+inner_radius:40
+outer_radius:80
+meshrefinementfactor:2
+E:70e3
+v:0.25
+Q:35e3
+T:1 
+P_max:50
+time_l:2
+time_f:10
+number_elements:10
+delta_time:0.1

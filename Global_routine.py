@@ -78,7 +78,6 @@ def Newton_Raphson_method(K_max,tolerence,num_elements,element_lengths,E,v,Q,T,d
     def Infinity_norm(y):
         result = np.linalg.norm(y,ord=np.inf)
         return result.item()
-
     while True:
         F_int,sigma_ov = assemble_Fint(U_int,strain_int,sigma_ov_int,E,v,dt,Q,T,r_nodes,element_lengths)
         detKt = np.linalg.det(Kt)
@@ -89,17 +88,17 @@ def Newton_Raphson_method(K_max,tolerence,num_elements,element_lengths,E,v,Q,T,d
         R = -(F_int - F_ext)
         del_u = Kt_inv@R
         U_next = U_int + del_u
-        F_int,sigma_ov = assemble_Fint(U_next,strain_int,sigma_ov_int,E,v,dt,Q,T,r_nodes,element_lengths)
-        R = -(F_int-F_ext)
+        F_int_next,sigma_ov = assemble_Fint(U_next,strain_int,sigma_ov_int,E,v,dt,Q,T,r_nodes,element_lengths)
+        R = -(F_int_next-F_ext)
 
         norm_R = Infinity_norm(R)
         norm_delta_U = Infinity_norm(del_u)
-        norm_Fint = Infinity_norm(F_int)
+        norm_Fint = Infinity_norm(F_int_next)
         norm_U = Infinity_norm(U_next)
 
         if k == K_max:
             print(f'Not converging {k}')
-        if ((k>=K_max) or (norm_R <=tolerence*norm_Fint or norm_delta_U <=tolerence*norm_U)):
+        if ((k>=K_max) or (norm_R <tolerence*norm_Fint or norm_delta_U <tolerence*norm_U)):
             print(f'Numer of NR runs : {k+1} @ time step {t}')
             return U_next,sigma_ov
         U_int = U_next
@@ -132,6 +131,7 @@ def assemble_stress(strain,sigma_ov,E,v,number_elements):
 def non_linear_fem_solver(num_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_nodes,t_l,t_f):
 
     time = np.arange(0,t_f+1,dt)
+    time = time[time<=10.0]
     U = []
     U_int = np.zeros((len(r_nodes),1))
     strain = np.zeros((2,num_elements))
@@ -139,6 +139,8 @@ def non_linear_fem_solver(num_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_node
     U_tL = np.array([[],[]])
     p =0
 
+    #print(f'Time : {time}')
+    print(f'Number of elements : {num_elements}')
     for t in time[1:]:
         if( t <= t_l):
             p+= 25*dt
@@ -148,12 +150,15 @@ def non_linear_fem_solver(num_elements,element_lengths,E,v,Q,T,dt,P_max,a,r_node
         U.append(U_next.flatten())
         stress_ov = sigma_ov_updated
         strain = assemble_strain(U_next,num_elements,element_lengths,r_nodes)
+        #print(f'Strain in NR : {strain}')
+        #print(f'Overstress : {stress_ov}')
         U_int = U_next
         U_tL = U_next
     
     #compute stress and strain for last time step
 
     strain_L = assemble_strain(U_tL,num_elements,element_lengths,r_nodes)
+    #print(f'Strain last {strain_L}')
     stress_L = assemble_stress(strain_L,stress_ov,E,v,num_elements)
 
     return U,stress_L
